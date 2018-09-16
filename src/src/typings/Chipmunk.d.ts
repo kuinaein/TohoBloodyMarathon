@@ -5,6 +5,7 @@ declare namespace cp {
     width: number,
     height: number
   ): number;
+  export function momentForBox2(m: number, box: PolyShape): number;
 
   export class Vect {
     public x: number;
@@ -12,23 +13,45 @@ declare namespace cp {
     public constructor(x: number, y: number);
   }
 
-  export class Shape {}
+  export class BB {
+    public l: number;
+    public b: number;
+    public r: number;
+    public t: number;
+    public constructor(l: number, b: number, r: number, t: number);
+  }
 
-  export class SegmentShape {
+  export class Arbiter {}
+
+  export class Shape {
+    public setCollisionType(collision_type: number);
+    public setFriction(u: number);
+    public setElasticity(e: number);
+  }
+
+  export class SegmentShape extends Shape {
     public constructor(body: Body, a: Vect, b: Vect, r: number);
   }
 
-  export class PolyShape extends Shape {}
+  export class PolyShape extends Shape {
+    public getVert(i: number): Vect;
+  }
 
   export class BoxShape extends PolyShape {
     public constructor(body: cp.Body, width: number, height: number);
+  }
+  export class BoxShape2 extends PolyShape {
+    public constructor(body: cp.Body, box: BB);
   }
 
   export class Body {
     public constructor(m: number, i: number);
     public kineticEnergy(): number;
+    public eachShape(func: (shape: cp.Shape) => void);
+    public getPos(): Vect;
     public setPos(pos: Vect);
     public applyImpulse(j: Vect, r: Vect);
+    public velocity_func(gravity: Vect, damping: number, dt: number);
   }
 
   export class StaticBody extends Body {}
@@ -36,8 +59,18 @@ declare namespace cp {
   export class Space {
     public gravity: Vect;
     public addBody(body: Body): Body;
+    public removeBody(body: Body);
     public addShape(shape: Shape): Shape;
+    public removeShape(shape: Shape);
     public addStaticShape(shape: shape): Shape;
+    public addCollisionHandler(
+      a: number,
+      b: number,
+      begin?: (arb: Arbiter, space: Space) => boolean,
+      preSolve?: (arb: Arbiter, space: Space) => void,
+      postSolve?: (arb: Arbiter, space: Space) => boolean,
+      separate?: (arb: Arbiter, space: Space) => void
+    );
     public step(dt: number);
   }
 }

@@ -27,11 +27,21 @@ declare namespace cc {
   readonly GRAY: Color;
   };
 
+  export function pDistanceSQ(point1: Point, point2: Point): number;
+
+  export function follow(followedNode: Node, rect: Rect): Follow | null;
   export function fadeTo(duration: number, opacity: number): FadeTo;
+  export function tintTo(
+    duration: number,
+    red: number,
+    green: number,
+    blue: number
+  ): TintTo;
   export function blink(duration: number, blinks: number): Blink;
   export function sequence(
     tempArray: FiniteTimeAction[] | FiniteTimeAction
   ): Sequence;
+  export function repeat(action: FiniteTimeAction, times: number): Repeat;
   export function repeatForever(action: FiniteTimeAction): RepeatForever;
 
   export class Point {
@@ -78,6 +88,11 @@ declare namespace cc {
       offset?: Point,
       originalSize?: Size
     );
+    public getRect(): Rect;
+    public setRect(rect: Rect);
+    public getRectInPixels(): Rect;
+    public clone(): SpriteFrame;
+    public copy(): SpriteFrame;
   }
 
   export class Texture2D extends Class {
@@ -98,14 +113,14 @@ declare namespace cc {
   export class EventTouch extends Event {}
 
   export class EventListener extends Class {
-    public readonly ACCELERATION;
-    public readonly CUSTOM;
-    public readonly FOCUS;
-    public readonly KEYBOARD;
-    public readonly MOUSE;
-    public readonly TOUCH_ALL_AT_ONCE;
-    public readonly TOUCH_ONE_BY_ONE;
-    public readonly UNKNOWN;
+    public static readonly ACCELERATION;
+    public static readonly CUSTOM;
+    public static readonly FOCUS;
+    public static readonly KEYBOARD;
+    public static readonly MOUSE;
+    public static readonly TOUCH_ALL_AT_ONCE;
+    public static readonly TOUCH_ONE_BY_ONE;
+    public static readonly UNKNOWN;
   }
 
   export class _EventListenerTouchOneByOne extends EventListener {
@@ -116,14 +131,15 @@ declare namespace cc {
     public onTouchCancelled(touch: Touch, event: EventTouch);
   }
 
-  export class Action extends Class {}
+  export class Action extends Class {
+    public setTag(tag: number);
+  }
 
+  export class Follow extends Action {}
   export class FiniteTimeAction extends Action {}
-
   export class ActionInterval extends FiniteTimeAction {}
-
   export class FadeTo extends ActionInterval {}
-
+  export class TintTo extends ActionInterval {}
   export class Blink extends ActionInterval {}
 
   export class Animate extends ActionInterval {
@@ -131,7 +147,7 @@ declare namespace cc {
   }
 
   export class Sequence extends ActionInterval {}
-
+  export class Repeat extends ActionInterval {}
   export class RepeatForever extends ActionInterval {}
 
   export class Animation extends Class {
@@ -142,6 +158,9 @@ declare namespace cc {
   export class Node extends Class {
     public x: number;
     public y: number;
+
+    public getParent(): Node;
+    public getChildren(): Node[];
 
     public setAnchorPoint(point: Point | number, y?: number);
     public getContentSize(): Size;
@@ -154,14 +173,24 @@ declare namespace cc {
     public setPositionY(y: number);
     public getBoundingBox(): Rect;
     public getBoundingBoxToWorld(): Rect;
+    public getScale(): number;
     public setScale(scale: number, scaleY?: number);
+    public getScaleX(): number;
     public setScaleX(newScaleX: number);
+    public getScaleY(): number;
     public setScaleY(newScaleY: number);
+    public setColor(color: Color);
 
     public setVisible(visible: boolean);
     public addChild(child: Node, localZOrder?: number, tag?: number | string);
+    public removeChild(child: Node, cleanup?: boolean);
     public scheduleUpdate();
+
+    public getActionManager(): ActionManager;
+    public getActionByTag(tag: number);
     public runAction(action: Action);
+    public stopAction(action: Action);
+    public stopActionByTag(tag: number);
   }
 
   export class ParallaxNode extends Node {
@@ -175,6 +204,7 @@ declare namespace cc {
       rotated?: boolean
     );
 
+    public getSpriteFrame(): SpriteFrame;
     public getTexture(): Texture2D;
     public setTextureRect(
       rect: Rect,
@@ -200,6 +230,7 @@ declare namespace cc {
       vAlignment?: number
     );
 
+    public setString(text: string);
     public setFontFillColor(fillColor: Color);
     public enableShadow(shadowColor: Color, offset: Size, blurRadius: number);
   }
@@ -218,6 +249,16 @@ declare namespace cc {
 
   export class Scene extends Node {
     public create(): Scene;
+  }
+
+  export class TransitionScene extends Scene {}
+
+  export class TransitionFade extends TransitionScene {
+    public constructor(t: number, scene: Scene, color: Color);
+  }
+
+  export class ActionManager {
+    public addAction(action: Action, target: Node, paused: boolean);
   }
 
   export class PhysicsDebugNode extends DrawNode {
