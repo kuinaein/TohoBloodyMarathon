@@ -4,11 +4,17 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-  entry: './src/main.js',
+  entry: {
+    init: './src/init.js',
+    app: './src/app.js',
+  },
   output: {
     path: path.resolve(__dirname, './dist'),
     publicPath: '/dist/',
-    filename: 'build.js',
+    filename: '[name].js',
+  },
+  externals: {
+    fs: {},
   },
   module: {
     rules: [
@@ -31,7 +37,9 @@ module.exports = {
     ],
   },
   resolve: {
-    alias: {},
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
     extensions: ['*', '.js', '.json'],
   },
   devServer: {
