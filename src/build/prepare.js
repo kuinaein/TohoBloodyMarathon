@@ -19,11 +19,7 @@ copyDir.sync(
 // copyDir.sync(COCOS_X_ROOT,
 // path.resolve(__dirname, '../frameworks/cocos2d-x'));
 
-const distDir = path.resolve(__dirname, '../dist');
-if (!fs.existsSync(distDir)) {
-  fs.mkdirSync(distDir);
-}
-const staticDir = path.resolve(__dirname, '../static');
-for (const f of fs.readdirSync(staticDir)) {
-  fs.copyFileSync(path.resolve(staticDir, f), path.resolve(distDir, f));
-}
+copyDir.sync(
+    path.resolve(__dirname, '../static'),
+    path.resolve(__dirname, '../dist')
+);

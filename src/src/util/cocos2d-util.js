@@ -1,17 +1,22 @@
 /**
  * @param {*} layerProps
  * @param {?cc.Layer} baseClass
+ * @param {?*} props Scene のプロパティ
  * @return {*}
  */
-export function createSingleLayerScene(layerProps, baseClass) {
+export function createSingleLayerScene(layerProps, baseClass, props) {
   const LayerClass = (baseClass || cc.Layer).extend(layerProps);
   /** @type {cc.Scene} */
-  const sceneProps = {
-    onEnter: function() {
-      this._super();
-      const layer = new LayerClass();
-      this.addChild(layer);
-    },
-  };
+  const sceneProps = Object.assign(
+      {},
+      {
+        onEnter() {
+          this._super();
+          const layer = new LayerClass();
+          this.addChild(layer);
+        },
+      },
+      props || {}
+  );
   return cc.Scene.extend(sceneProps);
 }

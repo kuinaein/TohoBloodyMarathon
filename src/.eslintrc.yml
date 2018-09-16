@@ -11,3 +11,10 @@ rules:
   linebreak-style:
     - error
     - windows
+
+overrides:
+  - files: '*.d.ts'
+    parser: typescript-eslint-parser
+    rules:
+      no-unused-vars: off
+      require-jsdoc: off

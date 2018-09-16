@@ -27,6 +27,8 @@
     "eslint-config-google": "^0.10.0",
     "file-loader": "^1.1.4",
     "rimraf": "^2.6.2",
+    "typescript": "^3.0.3",
+    "typescript-eslint-parser": "^18.0.0",
     "webpack": "^3.6.0",
     "webpack-dev-server": "^2.9.1"
   }

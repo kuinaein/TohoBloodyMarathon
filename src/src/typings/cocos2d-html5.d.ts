@@ -1,8 +1,21 @@
+declare const gl: WebGLRenderingContext;
+
 declare namespace cc {
+  export const ALIGN_CENTER;
+  export const ALIGN_TOP;
+  export const ALIGN_TOP_RIGHT;
+  export const ALIGN_RIGHT;
+  export const ALIGN_BOTTOM_RIGHT;
+  export const ALIGN_BOTTOM;
+  export const ALIGN_BOTTOM_LEFT;
+  export const ALIGN_LEFT;
+  export const ALIGN_TOP_LEFT;
+
   export const winSize: Size;
 
   export function p(x: number, y: number): Point;
   export function size(w: number, h: number): Size;
+  export function rect(x: number, y: number, w: number, h: number): Rect;
   export const color: {
   (r: number | string | Color, g?: number, b?: number, a?: number): Color;
   readonly WHITE: Color;
@@ -23,16 +36,24 @@ declare namespace cc {
   ): Sequence;
   export function repeatForever(action: FiniteTimeAction): RepeatForever;
 
+  export class Point {
+    public x: number;
+    public y: number;
+    public constructor(x: number, y: number);
+  }
+
   export class Size {
     public width: number;
     public height: number;
     public constructor(width: number, height: number);
   }
 
-  export class Point {
+  export class Rect {
     public x: number;
     public y: number;
-    public constructor(x: number, y: number);
+    public width: number;
+    public height: number;
+    public constructor(x: number, y: number, width: number, height: number);
   }
 
   export class Color {
@@ -47,6 +68,21 @@ declare namespace cc {
 
   export class Class {
     public extend(props): typeof Class;
+  }
+
+  export class SpriteFrame extends Class {}
+  export class Texture2D extends Class {
+    public setTexParameters(
+      texParams: {
+      minFilter;
+      magFilter;
+      wrapS;
+      wrapT;
+      },
+      magFilter?,
+      wrapS?,
+      wrapT?
+    );
   }
 
   export class EventListener extends Class {
@@ -78,11 +114,45 @@ declare namespace cc {
     public x: number;
     public y: number;
 
+    public setAnchorPoint(point: Point | number, y?: number);
+    public getContentSize(): Size;
+    public setContentSize(size: Size | number, height?: number);
+    public getPosition(): Point;
+    public getPositionX(): number;
+    public getPositionY(): number;
+    public setPosition(newPosOrxValue: Point | number, yValue: number);
+    public setPositionX(x: number);
+    public setPositionY(y: number);
+    public getBoundingBox(): Rect;
+    public getBoundingBoxToWorld(): Rect;
+    public setScale(scale: number, scaleY?: number);
+    public setScaleX(newScaleX: number);
+    public setScaleY(newScaleY: number);
+
     public addChild(child: Node, localZOrder?: number, tag?: number | string);
+    public scheduleUpdate();
     public runAction(action: Action);
   }
 
-  export class Sprite extends Node {}
+  export class ParallaxNode extends Node {
+    public addChild(child: Node, z: number, ratio: Point, offset: Point);
+  }
+
+  export class Sprite extends Node {
+    public constructor(
+      fileName: string | SpriteFrame | HTMLImageElement | cc.Texture2D,
+      rect?: Rect,
+      rotated?: boolean
+    );
+
+    public getTexture(): Texture2D;
+    public setTextureRect(
+      rect: Rect,
+      rotated?: boolean,
+      untrimmedSize?: Size,
+      needConvert?: boolean
+    );
+  }
 
   export class LabelTTF extends Sprite {
     public constructor(
