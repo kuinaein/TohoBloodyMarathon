@@ -7,7 +7,7 @@ const titleLayerProps = {
     this._super(cc.color.WHITE);
     const size = cc.winSize;
 
-    const titleLabel = new cc.LabelTTF('東方血吐走', 'serif', 64);
+    const titleLabel = new cc.LabelTTF('東方血吐走', 'serif', 48);
     titleLabel.setFontFillColor(cc.color(199, 60, 46, 255)); // 緋色
     titleLabel.enableShadow(cc.color.GRAY, cc.size(10, -10), 2);
     titleLabel.x = size.width / 2;

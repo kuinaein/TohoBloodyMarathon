@@ -1,5 +1,3 @@
-declare const gl: WebGLRenderingContext;
-
 declare namespace cc {
   export const ALIGN_CENTER;
   export const ALIGN_TOP;
@@ -56,6 +54,8 @@ declare namespace cc {
     public constructor(x: number, y: number, width: number, height: number);
   }
 
+  export class Touch {}
+
   export class Color {
     public r: number;
     public g: number;
@@ -70,7 +70,16 @@ declare namespace cc {
     public extend(props): typeof Class;
   }
 
-  export class SpriteFrame extends Class {}
+  export class SpriteFrame extends Class {
+    public constructor(
+      filename: string | Texture2D,
+      rect: Rect,
+      rotated?: boolean,
+      offset?: Point,
+      originalSize?: Size
+    );
+  }
+
   export class Texture2D extends Class {
     public setTexParameters(
       texParams: {
@@ -85,6 +94,9 @@ declare namespace cc {
     );
   }
 
+  export class Event extends Class {}
+  export class EventTouch extends Event {}
+
   export class EventListener extends Class {
     public readonly ACCELERATION;
     public readonly CUSTOM;
@@ -94,6 +106,14 @@ declare namespace cc {
     public readonly TOUCH_ALL_AT_ONCE;
     public readonly TOUCH_ONE_BY_ONE;
     public readonly UNKNOWN;
+  }
+
+  export class _EventListenerTouchOneByOne extends EventListener {
+    public swallowTouches: boolean;
+    public onTouchBegan(touch: Touch, event: EventTouch);
+    public onTouchMoved(touch: Touch, event: EventTouch);
+    public onTouchEnded(touch: Touch, event: EventTouch);
+    public onTouchCancelled(touch: Touch, event: EventTouch);
   }
 
   export class Action extends Class {}
@@ -106,9 +126,18 @@ declare namespace cc {
 
   export class Blink extends ActionInterval {}
 
+  export class Animate extends ActionInterval {
+    public constructor(animation: Animation);
+  }
+
   export class Sequence extends ActionInterval {}
 
   export class RepeatForever extends ActionInterval {}
+
+  export class Animation extends Class {
+    public constructor(frames: SpriteFrame[], delay: number, loops?: number);
+    public setRestoreOriginalFrame(restOrigFrame: boolean);
+  }
 
   export class Node extends Class {
     public x: number;
@@ -129,6 +158,7 @@ declare namespace cc {
     public setScaleX(newScaleX: number);
     public setScaleY(newScaleY: number);
 
+    public setVisible(visible: boolean);
     public addChild(child: Node, localZOrder?: number, tag?: number | string);
     public scheduleUpdate();
     public runAction(action: Action);
@@ -152,6 +182,12 @@ declare namespace cc {
       untrimmedSize?: Size,
       needConvert?: boolean
     );
+  }
+
+  export class PhysicsSprite extends Sprite {
+    public constructor(fileName: string | Texture2D | SpriteFrame, rect: rect);
+    public setBody(body: cp.Body);
+    public getBody(): cp.Body;
   }
 
   export class LabelTTF extends Sprite {
@@ -184,9 +220,13 @@ declare namespace cc {
     public create(): Scene;
   }
 
+  export class PhysicsDebugNode extends DrawNode {
+    public constructor(space: cp.Space);
+  }
+
   class EventManager {
     public addListener(
-      listener: EventListener | object,
+      listener: EventListener & {event?: any},
       nodeOrPriority: Node | number
     ): EventListener;
 
@@ -198,4 +238,13 @@ declare namespace cc {
     public runScene(scene: Scene);
   }
   export const director: Director;
+
+  class SpriteFrameCache {
+    public addSpriteFrames(
+      url: string,
+      texture?: HTMLImageElement | Texture2D | string
+    );
+    public getSpriteFrame(name: string): SpriteFrame;
+  }
+  export const spriteFrameCache: SpriteFrameCache;
 }
