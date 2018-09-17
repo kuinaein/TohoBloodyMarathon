@@ -8,6 +8,9 @@ import {RESOURCE_MAP} from '@/resource';
 import {AppConstants} from '@/core/constants';
 import {CHARACTER_SET_MAP} from '@/core/caharacter-def';
 
+const GRAVITY = cc.winSize.height * 3;
+const JUMP_FORCE = cc.winSize.height * 1.5;
+
 /**
  * @typedef MainLayerProps
  * @property {string} chosenChatacterName;
@@ -62,7 +65,7 @@ const mainLayerProps = {
     cc.eventManager.addListener(touchListener, this);
 
     this.scheduleUpdate();
-    cc.audioEngine.playMusic(RESOURCE_MAP.BGM_Main_mp3);
+    cc.audioEngine.playMusic(RESOURCE_MAP.BGM_Main_mp3, true);
     return true;
   },
 
@@ -99,7 +102,7 @@ const mainLayerProps = {
   /** 物理エンジン周りの初期化 */
   initPhysics() {
     const space = new cp.Space();
-    space.gravity = cp.v(0, -1300);
+    space.gravity = cp.v(0, -GRAVITY);
     if ('production' !== process.env.NODE_ENV) {
       const phDebugNode = new cc.PhysicsDebugNode(space);
       phDebugNode.setVisible(true);
@@ -111,6 +114,9 @@ const mainLayerProps = {
         new cp.StaticBody(),
         new cp.BB(0, 0, cc.winSize.width, floorHeight)
     );
+    floor.setFriction(1);
+    // 床の弾性係数をゼロにしないとジャンプの反動を食らう
+    floor.setElasticity(0);
     space.addStaticShape(floor);
     this.floorHeight = floorHeight;
 
@@ -151,13 +157,6 @@ const mainLayerProps = {
   update(dt) {
     this._super(dt);
     this.space.step(dt);
-
-    // たまに画面の上下に突き抜ける問題を回避したいができない件
-    // const pcBody = this.playerCharacter.getSprite().getBody();
-    // const pcPos = pcBody.getPos();
-    // if (cc.winSize.height < pcPos.y) {
-    //   pcBody.setPos(cp.v(pcPos.x, cc.winSize.y));
-    // }
 
     // 背景画像のスクロール;
     this.bg.setPositionX(this.bg.getPositionX() - 1);
@@ -243,8 +242,8 @@ const mainLayerProps = {
     const body = enemy.getSprite().getBody();
     body.velocity_func = () => {}; // 重力を無効化
     body.setPos(cp.v(cc.winSize.width, body.getPos().y));
-    // 10秒ごとに初期速度の20%荷重
-    const velocity = 150 + 30 * Math.floor(this.score / 10000);
+    // 10秒ごとに初期速度の10%荷重
+    const velocity = 150 + 15 * Math.floor(this.score / 10000);
     body.applyImpulse(cp.v(-velocity, 0), cp.v(0, 0));
     this.addCharacter(enemy);
     this.enemies.push(enemy);
@@ -268,28 +267,29 @@ const mainLayerProps = {
     this.playerCharacter
         .getSprite()
         .getBody()
-        .setVel(cp.v(0, 700));
-    // .applyImpulse(cp.v(0, 700), cp.v(0, 0));
+        .applyImpulse(cp.v(0, JUMP_FORCE), cp.v(0, 0));
     cc.audioEngine.playEffect(RESOURCE_MAP.SE_Jump);
   },
 
   onCollision() {
-    this.isLive = false;
-    cc.eventManager.removeAllListeners();
+    if (this.isLive) {
+      this.isLive = false;
+      cc.eventManager.removeAllListeners();
 
-    const next = new ResultScene(this.score, this.chosenChatacterName);
-    // TransitionFadeがときどきこけるので自前で処理
-    // const trans = new cc.TransitionFade(1, next, cc.color.RED);
+      const next = new ResultScene(this.score, this.chosenChatacterName);
+      // TransitionFadeがときどきこけるので自前で処理
+      // const trans = new cc.TransitionFade(1, next, cc.color.RED);
 
-    const action = cc.sequence([
-      cc.tintTo(1, 255, 0, 0),
-      cc.callFunc(() => {
-        cc.director.runScene(next);
-      }),
-    ]);
-    this.bg.runAction(action);
+      const action = cc.sequence([
+        cc.tintTo(1, 255, 0, 0),
+        cc.callFunc(() => {
+          cc.director.runScene(next);
+        }),
+      ]);
+      this.bg.runAction(action);
 
-    cc.audioEngine.stopMusic();
+      cc.audioEngine.stopMusic();
+    }
     cc.audioEngine.playEffect(RESOURCE_MAP.SE_Shock_mp3);
     return true;
   },

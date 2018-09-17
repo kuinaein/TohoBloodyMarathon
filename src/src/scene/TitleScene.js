@@ -82,7 +82,7 @@ const titleLayerProps = {
     this.addChild(aboutButton);
 
     const aboutButtonLabel = new cc.LabelTTF(
-        '本アプリに\nついて...',
+        'このアプリに\nついて...',
         'sans-serif',
         cc.winSize.height * 0.04
     );

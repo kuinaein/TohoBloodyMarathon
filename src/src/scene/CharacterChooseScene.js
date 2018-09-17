@@ -18,6 +18,28 @@ const characterChooseLayerProps = {
     staticBg.setAnchorPoint(0, 0);
     this.addChild(staticBg);
 
+    const titleLabel = new cc.LabelTTF(
+        '自機\n選択',
+        'sans-serif',
+        cc.winSize.height * 0.1
+    );
+    titleLabel.setAnchorPoint(0, 1);
+    titleLabel.setFontFillColor(cc.color.BLACK);
+    titleLabel.setPosition(
+        cc.p(cc.winSize.width * 0.05, cc.winSize.height * 0.95)
+    );
+    this.addChild(titleLabel);
+    const titleLabelSize = titleLabel.getContentSize();
+    const titleLabelBg = new cc.LayerColor(
+        cc.color(255, 255, 255, 128),
+        titleLabelSize.width * 1.4,
+        titleLabelSize.height * 1.1
+    );
+    titleLabelBg.setPosition(
+        cc.p(-titleLabelSize.width * 0.2, -titleLabelSize.height * 0.05)
+    );
+    titleLabel.addChild(titleLabelBg, -1);
+
     const characterDefs = [
       {anchor: cc.p(1, 0), def: CHARACTER_SET_MAP['お燐']}, // 左上
       {anchor: cc.p(0, 0), def: CHARACTER_SET_MAP['穣子']}, // 右上
