@@ -27,9 +27,16 @@ declare namespace cc {
   readonly GRAY: Color;
   };
 
+  export function pDistance(point1: Point, point2: Point): number;
   export function pDistanceSQ(point1: Point, point2: Point): number;
 
   export function follow(followedNode: Node, rect: Rect): Follow | null;
+  export function callFunc(
+    selector: () => void,
+    selectorTarget?: object | null,
+    data?: any | null
+  );
+
   export function fadeTo(duration: number, opacity: number): FadeTo;
   export function tintTo(
     duration: number,
@@ -64,7 +71,9 @@ declare namespace cc {
     public constructor(x: number, y: number, width: number, height: number);
   }
 
-  export class Touch {}
+  export class Touch {
+    public getLocation(): Point;
+  }
 
   export class Color {
     public r: number;
@@ -77,7 +86,8 @@ declare namespace cc {
   export class FontDefinition {}
 
   export class Class {
-    public extend(props): typeof Class;
+    public static extend(props): typeof Class;
+    public _super(...args): any;
   }
 
   export class SpriteFrame extends Class {
@@ -137,6 +147,10 @@ declare namespace cc {
 
   export class Follow extends Action {}
   export class FiniteTimeAction extends Action {}
+
+  export class ActionInstant extends FiniteTimeAction {}
+  export class CallFunc extends ActionInstant {}
+
   export class ActionInterval extends FiniteTimeAction {}
   export class FadeTo extends ActionInterval {}
   export class TintTo extends ActionInterval {}
@@ -161,6 +175,8 @@ declare namespace cc {
 
     public getParent(): Node;
     public getChildren(): Node[];
+    public getTag(): number;
+    public setTag(tag: number);
 
     public setAnchorPoint(point: Point | number, y?: number);
     public getContentSize(): Size;
@@ -182,6 +198,7 @@ declare namespace cc {
     public setColor(color: Color);
 
     public setVisible(visible: boolean);
+    public setOpacity(opacity: number);
     public addChild(child: Node, localZOrder?: number, tag?: number | string);
     public removeChild(child: Node, cleanup?: boolean);
     public scheduleUpdate();
@@ -242,10 +259,24 @@ declare namespace cc {
       lineWidth?: number,
       lineColor?: Color
     );
+
+    public drawDot(pos: Point, radius: number, color: Color);
+
+    public drawCircle(
+      center: Point,
+      radius: number,
+      angle: number,
+      segments: number,
+      drawLineToCenter: boolean,
+      lineWidth: number,
+      color: Color
+    );
   }
 
   export class Layer extends Node {}
-  export class LayerColor extends Layer {}
+  export class LayerColor extends Layer {
+    public constructor(color?: Color, width?: number, height?: number);
+  }
 
   export class Scene extends Node {
     public create(): Scene;

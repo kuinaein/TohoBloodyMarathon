@@ -26,9 +26,9 @@ class EnemyDefinition {
 }
 
 const ENEMY_DEFINITIONS = [
-  new EnemyDefinition(3, 1, 1, false), // こいし
-  new EnemyDefinition(3, 3, 1, true), // お空
-  new EnemyDefinition(3, 1, 1.5, false), // でかいこいし
+  new EnemyDefinition(3, 1, AppConstants.BASE_SCALE, false), // こいし
+  new EnemyDefinition(3, 3, AppConstants.BASE_SCALE, true), // お空
+  new EnemyDefinition(3, 1, AppConstants.BASE_SCALE * 1.5, false), // でかいこいし
 ];
 
 /**
@@ -53,15 +53,21 @@ const mainLayerProps = {
   CHARACTER_HEIGHT: 32,
 
   ctor() {
-    this._super(cc.color(251, 250, 245)); // 生成り色
+    this._super();
 
     this.isLive = true;
     this.enemyWait = 0;
     this.enemies = [];
     this.mt = new MersenneTwister();
 
-    const bg = new cc.Sprite(RESOURCE_MAP.BG_Country_png);
+    const staticBg = new cc.Sprite(RESOURCE_MAP.BG_Forest_png);
+    staticBg.setScale(cc.winSize.width / 640);
+    staticBg.setAnchorPoint(0, 0);
+    this.addChild(staticBg);
+
+    const bg = new cc.Sprite(RESOURCE_MAP.BG_Country_Platform_png);
     bg.setAnchorPoint(0, 0);
+    bg.setScale(1.5);
     this.addChild(bg);
     this.bg = bg;
 
@@ -85,24 +91,28 @@ const mainLayerProps = {
   initLabels() {
     this.score = 0;
 
-    const scoreLabel = new cc.LabelTTF('', 'sans-serif', 10);
+    const scoreLabel = new cc.LabelTTF(
+        '',
+        'sans-serif',
+        cc.winSize.height * 0.06
+    );
     scoreLabel.setAnchorPoint(cc.p(1, 1));
     scoreLabel.setPosition(cc.winSize.width * 0.98, cc.winSize.height * 0.98);
-    scoreLabel.setFontFillColor(cc.color.BLACK);
+    // scoreLabel.setFontFillColor(cc.color.BLACK);
     this.addChild(scoreLabel);
 
     const highScore = TbmStorage.get(TbmStorage.KEY_HIGH_SCORE) || 0;
     const highScoreLabel = new cc.LabelTTF(
         `ハイスコア： ${highScore} 粟`,
         'sans-serif',
-        10
+        cc.winSize.height * 0.06
     );
     highScoreLabel.setAnchorPoint(cc.p(1, 1));
     highScoreLabel.setPosition(
         scoreLabel.x,
-        scoreLabel.y - cc.winSize.height * 0.05
+        scoreLabel.y - cc.winSize.height * 0.08
     );
-    highScoreLabel.setFontFillColor(cc.color.BLACK);
+    // highScoreLabel.setFontFillColor(cc.color.BLACK);
     this.addChild(highScoreLabel);
 
     this.scoreLabel = scoreLabel;
@@ -111,14 +121,14 @@ const mainLayerProps = {
   /** 物理エンジン周りの初期化 */
   initPhysics() {
     const space = new cp.Space();
-    space.gravity = cp.v(0, -1000);
+    space.gravity = cp.v(0, -1200);
     if ('production' !== process.env.NODE_ENV) {
       const phDebugNode = new cc.PhysicsDebugNode(space);
       phDebugNode.setVisible(true);
       this.addChild(phDebugNode, 100);
     }
 
-    const floorHeight = (cc.winSize.height * 15) / 100;
+    const floorHeight = (cc.winSize.height * 13) / 100;
     const floor = new cp.SegmentShape(
         new cp.StaticBody(),
         cp.v(0, floorHeight),
@@ -138,7 +148,7 @@ const mainLayerProps = {
   },
 
   initPlayerCharacter() {
-    const pc = new TbmCharacter(1, 2, 1, 0);
+    const pc = new TbmCharacter(1, 2, AppConstants.BASE_SCALE, 0);
     pc.getShape().setCollisionType(AppConstants.COLLISION_TYPE_PLAYER);
     this.addCharacter(pc);
     this.playerCharacter = pc;
@@ -162,10 +172,12 @@ const mainLayerProps = {
     this._super(dt);
     this.space.step(dt);
 
-    // たまに地面の下に突き抜ける問題の回避用
+    // たまに画面の上下に突き抜ける問題の回避用
     const pcBody = this.playerCharacter.getSprite().getBody();
     const pcPos = pcBody.getPos();
-    if (this.floorHeight - AppConstants.CHARACTER_HEIGHT > pcPos.y) {
+    if (cc.winSize.height < pcPos.y) {
+      pcBody.setPos(cp.v(pcPos.x, cc.winSize.y));
+    } else if (this.floorHeight - AppConstants.CHARACTER_HEIGHT > pcPos.y) {
       const pcOffsetY = this.playerCharacter.getShape().getVert(0).y;
       pcBody.setPos(cp.v(pcPos.x, this.floorHeight - pcOffsetY));
     }
@@ -243,7 +255,10 @@ const mainLayerProps = {
     let flightLevel = 0;
     if (enemyDef.flying) {
       flightLevel =
-        (AppConstants.CHARACTER_HEIGHT * (this.mt.random_int() % 3)) / 2;
+        (AppConstants.CHARACTER_HEIGHT *
+          AppConstants.BASE_SCALE *
+          (this.mt.random_int() % 3)) /
+        2;
     }
     const enemy = new TbmCharacter(
         enemyDef.row,
@@ -256,8 +271,8 @@ const mainLayerProps = {
     const body = enemy.getSprite().getBody();
     body.velocity_func = () => {}; // 重力を無効化
     body.setPos(cp.v(cc.winSize.width, body.getPos().y));
-    // 10秒ごとに初期速度の20%加速
-    const velocity = 100 + 20 * Math.floor(this.score / 10000);
+    // 10秒ごとに初期速度の20%荷重
+    const velocity = 150 + 30 * Math.floor(this.score / 10000);
     body.applyImpulse(cp.v(-velocity, 0), cp.v(0, 0));
     this.addCharacter(enemy);
     this.enemies.push(enemy);
@@ -275,17 +290,26 @@ const mainLayerProps = {
     this.playerCharacter
         .getSprite()
         .getBody()
-        .applyImpulse(cp.v(0, 400), cp.v(0, 0));
+        .applyImpulse(cp.v(0, 500), cp.v(0, 0));
   },
 
   onCollision() {
     this.isLive = false;
     cc.eventManager.removeAllListeners();
+
     const next = new ResultScene(this.score);
-    const trans = new cc.TransitionFade(1, next, cc.color.RED);
-    cc.director.runScene(trans);
+    // TransitionFadeがときどきこけるので自前で処理
+    // const trans = new cc.TransitionFade(1, next, cc.color.RED);
+
+    const action = cc.sequence([
+      cc.tintTo(1, 255, 0, 0),
+      cc.callFunc(() => {
+        cc.director.runScene(next);
+      }),
+    ]);
+    this.bg.runAction(action);
     return true;
   },
 };
 
-export const MainScene = createSingleLayerScene(mainLayerProps, cc.LayerColor);
+export const MainScene = createSingleLayerScene(mainLayerProps);

@@ -1,4 +1,5 @@
 export const AppConstants = {
+  BASE_SCALE: 1.5,
   CHARACTER_WIDTH: 24,
   CHARACTER_HEIGHT: 32,
   GRAZE_DISTANCE_SQ: 0,

@@ -2,7 +2,7 @@
  * @param {*} layerProps
  * @param {?cc.Layer} baseClass
  * @param {?*} props Scene のプロパティ
- * @return {*}
+ * @return {*} Scene派生クラスのコンストラクタを返す
  */
 export function createSingleLayerScene(layerProps, baseClass, props) {
   const LayerClass = (baseClass || cc.Layer).extend(layerProps);

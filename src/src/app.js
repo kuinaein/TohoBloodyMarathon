@@ -1,7 +1,7 @@
 import '@/resource';
 import {TitleScene} from '@/scene/TitleScene';
 import {MainScene} from '@/scene/MainScene';
-import {ResultScene} from '@/scene/TitleScene';
+import {ResultScene} from '@/scene/ResultScene';
 
 /** @param {*} err */
 function knDefaultErrorHandler(err) {

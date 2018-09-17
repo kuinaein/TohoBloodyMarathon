@@ -1,48 +1,114 @@
 import {createSingleLayerScene} from '@/util/cocos2d-util';
 import {MainScene} from '@/scene/MainScene';
+import {RESOURCE_MAP} from '@/resource';
+import {AboutScene} from '@/scene/AboutScene';
 
-/** @type {cc.LayerColor} */
+const TAG_ABOUT_BUTTON_LABEL = 33;
+
+/**
+ * @typedef TitleLayerProps
+ * @property {cc.Point} centerOfAboutButon
+ * @property {number} radiusOfAboutButton
+ */
+
+/** @type {cc.LayerColor & TitleLayerProps} */
 const titleLayerProps = {
   ctor() {
-    this._super(cc.color.WHITE);
+    this._super();
     const size = cc.winSize;
 
-    const titleLabel = new cc.LabelTTF('東方血吐走', 'serif', 48);
-    titleLabel.setFontFillColor(cc.color(199, 60, 46, 255)); // 緋色
-    titleLabel.enableShadow(cc.color.GRAY, cc.size(10, -10), 2);
+    const staticBg = new cc.Sprite(RESOURCE_MAP.BG_Forest_png);
+    staticBg.setScale(cc.winSize.width / 640);
+    staticBg.setAnchorPoint(0, 0);
+    this.addChild(staticBg);
+
+    const orin = new cc.Sprite(RESOURCE_MAP.Orin_png);
+    orin.setAnchorPoint(cc.p(0, 0));
+    orin.setPositionX(cc.winSize.width * -0.01);
+    orin.setScale(0.3);
+    this.addChild(orin);
+
+    const titleLabel = new cc.Sprite(RESOURCE_MAP.Title_Logo_png);
+    titleLabel.setScale(1.5);
     titleLabel.x = size.width / 2;
     titleLabel.y = (size.height * 8) / 10;
     this.addChild(titleLabel);
 
+    this.initStartLabel();
+    this.initAboutButton();
+
+    const touchListener = {
+      event: cc.EventListener.TOUCH_ONE_BY_ONE,
+      swallowTouches: false,
+      onTouchBegan: this.onTouchBegan.bind(this),
+    };
+    cc.eventManager.addListener(touchListener, this);
+
+    return true;
+  },
+
+  initStartLabel() {
     const tapToStartLabel = new cc.LabelTTF(
         '画面をタップしてスタート',
         'sans-serif',
-        16
+        cc.winSize.height * 0.07
     );
     tapToStartLabel.setFontFillColor(cc.color.BLACK);
-    tapToStartLabel.x = size.width / 2;
-    tapToStartLabel.y = (size.height * 3) / 10;
-    tapToStartLabel.runAction(cc.repeatForever(cc.blink(1.5, 1)));
+    tapToStartLabel.x = cc.winSize.width * 0.5;
+    tapToStartLabel.y = cc.winSize.height * 0.3;
     this.addChild(tapToStartLabel);
-
-    cc.eventManager.addListener(
-        {
-          event: cc.EventListener.TOUCH_ONE_BY_ONE,
-          swallowTouches: false,
-          onTouchBegan() {
-            cc.eventManager.removeAllListeners();
-            cc.director.runScene(new MainScene());
-            return true;
-          },
-        },
-        this
+    const labelSize = tapToStartLabel.getContentSize();
+    const layerOverLabel = new cc.LayerColor(
+        cc.color(255, 255, 255, 128),
+        labelSize.width,
+        labelSize.height
     );
+    tapToStartLabel.addChild(layerOverLabel, -1);
+  },
 
+  initAboutButton() {
+    const aboutButton = new cc.DrawNode();
+    aboutButton.setAnchorPoint(1, 0);
+    this.centerOfAboutButon = cc.p(
+        cc.winSize.width * 0.9,
+        cc.winSize.height * 0.2
+    );
+    this.radiusOfAboutButton = cc.winSize.height * 0.15;
+    aboutButton.drawDot(
+        this.centerOfAboutButon,
+        this.radiusOfAboutButton,
+        cc.color(255, 255, 255, 224)
+    );
+    this.addChild(aboutButton);
+
+    const aboutButtonLabel = new cc.LabelTTF(
+        '本アプリに\nついて...',
+        'sans-serif',
+        cc.winSize.height * 0.04
+    );
+    aboutButtonLabel.setFontFillColor(cc.color.BLACK);
+    aboutButtonLabel.setAnchorPoint(0.5, 0);
+    aboutButtonLabel.x = cc.winSize.width * 0.9;
+    aboutButtonLabel.y = cc.winSize.height * 0.13;
+    aboutButtonLabel.setTag(TAG_ABOUT_BUTTON_LABEL);
+    this.addChild(aboutButtonLabel);
+  },
+
+  /**
+   * @param {cc.Touch} touch
+   * @param {cc.EventTouch} event
+   * @return {boolean}
+   */
+  onTouchBegan(touch, event) {
+    cc.eventManager.removeAllListeners();
+    const r2 = Math.pow(this.radiusOfAboutButton, 2);
+    if (r2 > cc.pDistanceSQ(touch.getLocation(), this.centerOfAboutButon)) {
+      cc.director.runScene(new AboutScene());
+    } else {
+      cc.director.runScene(new MainScene());
+    }
     return true;
   },
 };
 
-export const TitleScene = createSingleLayerScene(
-    titleLayerProps,
-    cc.LayerColor
-);
+export const TitleScene = createSingleLayerScene(titleLayerProps);
