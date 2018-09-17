@@ -76,6 +76,7 @@ const characterChooseLayerProps = {
           ])
       );
       this.addChild(frame);
+      cc.audioEngine.playEffect(RESOURCE_MAP.SE_GameStart_mp3);
       break;
     }
     return false;

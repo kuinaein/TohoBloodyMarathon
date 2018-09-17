@@ -66,6 +66,7 @@ const resultLayerProps = {
         this
     );
 
+    cc.audioEngine.playEffect(RESOURCE_MAP.SE_Result_mp3);
     return true;
   },
 

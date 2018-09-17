@@ -320,6 +320,7 @@ declare namespace cc {
     public runScene(scene: Scene);
     public pushScene(scene: Scene);
     public popScene();
+    public setDisplayStats(displayStats: boolean);
   }
   export const director: Director;
 
@@ -331,4 +332,11 @@ declare namespace cc {
     public getSpriteFrame(name: string): SpriteFrame;
   }
   export const spriteFrameCache: SpriteFrameCache;
+
+  class AudioEngine {
+    public playEffect(url: string, loop?: boolean): number | null;
+    public playMusic(url: string, loop?: boolean): number | null;
+    public stopMusic(releaseData?: boolean);
+  }
+  export const audioEngine: AudioEngine;
 }

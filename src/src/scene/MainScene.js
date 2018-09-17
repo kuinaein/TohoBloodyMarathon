@@ -62,6 +62,7 @@ const mainLayerProps = {
     cc.eventManager.addListener(touchListener, this);
 
     this.scheduleUpdate();
+    cc.audioEngine.playMusic(RESOURCE_MAP.BGM_Main_mp3);
     return true;
   },
 
@@ -106,11 +107,9 @@ const mainLayerProps = {
     }
 
     const floorHeight = (cc.winSize.height * 15) / 100;
-    const floor = new cp.SegmentShape(
+    const floor = new cp.BoxShape2(
         new cp.StaticBody(),
-        cp.v(0, floorHeight),
-        cp.v(cc.winSize.width, floorHeight),
-        0
+        new cp.BB(0, 0, cc.winSize.width, floorHeight)
     );
     space.addStaticShape(floor);
     this.floorHeight = floorHeight;
@@ -153,15 +152,12 @@ const mainLayerProps = {
     this._super(dt);
     this.space.step(dt);
 
-    // たまに画面の上下に突き抜ける問題の回避用
-    const pcBody = this.playerCharacter.getSprite().getBody();
-    const pcPos = pcBody.getPos();
-    if (cc.winSize.height < pcPos.y) {
-      pcBody.setPos(cp.v(pcPos.x, cc.winSize.y));
-    } else if (this.floorHeight - AppConstants.CHARACTER_HEIGHT > pcPos.y) {
-      const pcOffsetY = this.playerCharacter.getShape().getVert(0).y;
-      pcBody.setPos(cp.v(pcPos.x, this.floorHeight - pcOffsetY));
-    }
+    // たまに画面の上下に突き抜ける問題を回避したいができない件
+    // const pcBody = this.playerCharacter.getSprite().getBody();
+    // const pcPos = pcBody.getPos();
+    // if (cc.winSize.height < pcPos.y) {
+    //   pcBody.setPos(cp.v(pcPos.x, cc.winSize.y));
+    // }
 
     // 背景画像のスクロール;
     this.bg.setPositionX(this.bg.getPositionX() - 1);
@@ -254,19 +250,27 @@ const mainLayerProps = {
     this.enemies.push(enemy);
   },
 
-  onTouchBegan() {
-    // 多段ジャンプ禁止
+  isAbleToJump() {
     return (
       this.floorHeight + AppConstants.CHARACTER_HEIGHT >
       this.playerCharacter.getSprite().getPositionY()
     );
   },
 
+  onTouchBegan() {
+    return this.isAbleToJump();
+  },
+
   onTouchEnded() {
+    if (!this.isAbleToJump()) {
+      return;
+    }
     this.playerCharacter
         .getSprite()
         .getBody()
-        .applyImpulse(cp.v(0, 700), cp.v(0, 0));
+        .setVel(cp.v(0, 700));
+    // .applyImpulse(cp.v(0, 700), cp.v(0, 0));
+    cc.audioEngine.playEffect(RESOURCE_MAP.SE_Jump);
   },
 
   onCollision() {
@@ -284,6 +288,9 @@ const mainLayerProps = {
       }),
     ]);
     this.bg.runAction(action);
+
+    cc.audioEngine.stopMusic();
+    cc.audioEngine.playEffect(RESOURCE_MAP.SE_Shock_mp3);
     return true;
   },
 };

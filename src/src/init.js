@@ -132,6 +132,7 @@ cc.game.onStart = function() {
   cc.LoaderScene.preload(
       gResources,
       function() {
+        cc.director.setDisplayStats('production' !== process.env.NODE_ENV);
         cc.director.runScene(new tbm.TitleScene());
       },
       this

@@ -104,8 +104,10 @@ const titleLayerProps = {
     const r2 = Math.pow(this.radiusOfAboutButton, 2);
     if (r2 > cc.pDistanceSQ(touch.getLocation(), this.centerOfAboutButon)) {
       cc.director.runScene(new AboutScene());
+      cc.audioEngine.playEffect(RESOURCE_MAP.SE_Transition_mp3);
     } else {
       cc.director.runScene(new CharacterChooseScene());
+      cc.audioEngine.playEffect(RESOURCE_MAP.SE_Transition_mp3);
     }
     return false;
   },

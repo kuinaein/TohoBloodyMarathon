@@ -5,6 +5,7 @@ const webpack = require('webpack');
 
 module.exports = {
   entry: {
+    loading: './src/loading.js',
     init: './src/init.js',
     app: './src/app.js',
   },

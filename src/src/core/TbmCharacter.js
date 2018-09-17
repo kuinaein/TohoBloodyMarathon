@@ -26,18 +26,12 @@ export class TbmCharacter {
     sprite.setScale(this.def.scale);
     sprite.setAnchorPoint(cc.p(0.5, 0));
     const bodyWidth = AppConstants.CHARACTER_WIDTH * 0.5 * this.def.scale;
-    const bodyHeight = AppConstants.CHARACTER_HEIGHT * 0.8 * this.def.scale;
-    const bodyOffsetY = AppConstants.CHARACTER_HEIGHT * 0.1 * this.def.scale;
+    const bodyHeight = AppConstants.CHARACTER_HEIGHT * 0.9 * this.def.scale;
     const body = new cp.Body(1, cp.momentForBox(1, bodyWidth, bodyHeight));
     body.setPos(cp.v((cc.winSize.width * 1) / 10, 0));
     this.shape = new cp.BoxShape2(
         body,
-        new cp.BB(
-            -(bodyWidth / 2),
-            bodyOffsetY,
-            bodyWidth / 2,
-            bodyOffsetY + bodyHeight
-        )
+        new cp.BB(-(bodyWidth / 2), 0, bodyWidth / 2, bodyHeight)
     );
     sprite.setBody(body);
 

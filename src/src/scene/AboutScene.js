@@ -50,7 +50,7 @@ const aboutLayerProps = {
         `- 本作品に登場するキャラクターや世界観等の著作権は、
    上海アリス幻樂団様が保有しています。
 - その他、下記の方々の素材を利用させていただきました。
-  ※下記は利用に当たりクレジット表記が必須とされているもののみ
+  ※下記は利用にあたりクレジット表記が必須とされているもののみ
    - spellyon様    配布元サイト「点睛集積」
    - エルル様    配布元サイト「えるるのだいあり」
      他多数
@@ -72,6 +72,7 @@ const aboutLayerProps = {
   onTouchBegan(touch, event) {
     cc.eventManager.removeAllListeners();
     cc.director.runScene(new tbm.TitleScene());
+    cc.audioEngine.playEffect(RESOURCE_MAP.SE_Transition_mp3);
     return false;
   },
 };
