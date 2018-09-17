@@ -277,6 +277,8 @@ declare namespace cc {
 
   class Director {
     public runScene(scene: Scene);
+    public pushScene(scene: Scene);
+    public popScene();
   }
   export const director: Director;
 

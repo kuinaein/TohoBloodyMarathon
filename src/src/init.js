@@ -132,7 +132,7 @@ cc.game.onStart = function() {
   cc.LoaderScene.preload(
       gResources,
       function() {
-        cc.director.runScene(new TitleScene());
+        cc.director.runScene(new tbm.TitleScene());
       },
       this
   );

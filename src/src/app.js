@@ -1,5 +1,7 @@
 import '@/resource';
 import {TitleScene} from '@/scene/TitleScene';
+import {MainScene} from '@/scene/MainScene';
+import {ResultScene} from '@/scene/TitleScene';
 
 /** @param {*} err */
 function knDefaultErrorHandler(err) {
@@ -12,4 +14,9 @@ function knDefaultErrorHandler(err) {
 window.addEventListener('error', knDefaultErrorHandler);
 window.addEventListener('unhandledrejection', knDefaultErrorHandler);
 
-window.TitleScene = TitleScene;
+window.tbm = window.tbm || {};
+Object.assign(window.tbm, {
+  TitleScene,
+  MainScene,
+  ResultScene,
+});

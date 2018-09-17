@@ -171,7 +171,7 @@ const mainLayerProps = {
     }
 
     // 背景画像のスクロール;
-    this.bg.setPositionX(this.bg.getPositionX() - 2);
+    this.bg.setPositionX(this.bg.getPositionX() - 1);
     const bgBox = this.bg.getBoundingBoxToWorld();
     if (cc.winSize.width > bgBox.x + bgBox.width) {
       this.bg.setPositionX(bgBox.x + bgBox.width / 3);
@@ -224,10 +224,16 @@ const mainLayerProps = {
       pcSprite.runAction(action);
     }
 
-    this.enemyWait -= dt;
-    if (0 >= this.enemyWait) {
-      this.generateEnemy();
-      this.enemyWait = 1 + this.mt.random();
+    if (
+      0 == this.enemies.length ||
+      cc.winSize.width * 0.6 >
+        this.enemies[this.enemies.length - 1].getSprite().getPositionX()
+    ) {
+      this.enemyWait -= dt;
+      if (0 >= this.enemyWait) {
+        this.generateEnemy();
+        this.enemyWait = this.mt.random();
+      }
     }
   },
 
@@ -260,11 +266,8 @@ const mainLayerProps = {
   onTouchBegan() {
     // 多段ジャンプ禁止
     return (
-      10 >
-      this.playerCharacter
-          .getSprite()
-          .getBody()
-          .kineticEnergy()
+      this.floorHeight + AppConstants.CHARACTER_HEIGHT >
+      this.playerCharacter.getSprite().getPositionY()
     );
   },
 
