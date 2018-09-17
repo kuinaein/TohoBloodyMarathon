@@ -3,7 +3,7 @@ import {RESOURCE_MAP} from '@/resource';
 
 /** @type {cc.Layer} */
 const resultLayerProps = {
-  ctor(score) {
+  ctor(score, chosenCharacterName) {
     this._super();
     let oldHighScore = parseInt(TbmStorage.get(TbmStorage.KEY_HIGH_SCORE) || 0);
     if (isNaN(oldHighScore)) {
@@ -11,6 +11,10 @@ const resultLayerProps = {
     }
     if (score > oldHighScore) {
       TbmStorage.set(TbmStorage.KEY_HIGH_SCORE, '' + score);
+      TbmStorage.set(
+          TbmStorage.KEY_HIGH_SCORE_CHARACTER,
+          '' + chosenCharacterName
+      );
     }
 
     const staticBg = new cc.Sprite(RESOURCE_MAP.BG_Forest_png);
@@ -56,7 +60,7 @@ const resultLayerProps = {
           onTouchBegan() {
             cc.eventManager.removeAllListeners();
             cc.director.runScene(new tbm.TitleScene());
-            return true;
+            return false;
           },
         },
         this
@@ -114,14 +118,15 @@ const resultLayerProps = {
 
 /** @type {cc.Scene} */
 const resultSceneProps = {
-  ctor(score) {
+  ctor(score, chosenCharacterName) {
     this._super();
     this.score = score;
+    this.chosenCharacterName = chosenCharacterName;
   },
   onEnter() {
     this._super();
     const LayerClass = cc.Layer.extend(resultLayerProps);
-    const layer = new LayerClass(this.score);
+    const layer = new LayerClass(this.score, this.chosenCharacterName);
     this.addChild(layer);
   },
 };

@@ -24,3 +24,5 @@ export class TbmStorage {
 }
 
 TbmStorage.KEY_HIGH_SCORE = 'toho_bloody_marathon.highscore';
+TbmStorage.KEY_HIGH_SCORE_CHARACTER =
+  'toho_bloody_marathon.highscore.character';

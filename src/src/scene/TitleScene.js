@@ -1,7 +1,7 @@
 import {createSingleLayerScene} from '@/util/cocos2d-util';
-import {MainScene} from '@/scene/MainScene';
 import {RESOURCE_MAP} from '@/resource';
 import {AboutScene} from '@/scene/AboutScene';
+import {CharacterChooseScene} from '@/scene/CharacterChooseScene';
 
 const TAG_ABOUT_BUTTON_LABEL = 33;
 
@@ -22,7 +22,7 @@ const titleLayerProps = {
     staticBg.setAnchorPoint(0, 0);
     this.addChild(staticBg);
 
-    const orin = new cc.Sprite(RESOURCE_MAP.Orin_png);
+    const orin = new cc.Sprite(RESOURCE_MAP.Orin_Title_png);
     orin.setAnchorPoint(cc.p(0, 0));
     orin.setPositionX(cc.winSize.width * -0.01);
     orin.setScale(0.3);
@@ -105,9 +105,9 @@ const titleLayerProps = {
     if (r2 > cc.pDistanceSQ(touch.getLocation(), this.centerOfAboutButon)) {
       cc.director.runScene(new AboutScene());
     } else {
-      cc.director.runScene(new MainScene());
+      cc.director.runScene(new CharacterChooseScene());
     }
-    return true;
+    return false;
   },
 };
 

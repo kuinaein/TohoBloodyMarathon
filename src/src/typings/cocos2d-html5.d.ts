@@ -29,6 +29,8 @@ declare namespace cc {
 
   export function pDistance(point1: Point, point2: Point): number;
   export function pDistanceSQ(point1: Point, point2: Point): number;
+  export function rectContainsPoint(rect: Rect, point: Point): boolean;
+  export function rectContainsRect(rect: Rect, point: Rect): boolean;
 
   export function follow(followedNode: Node, rect: Rect): Follow | null;
   export function callFunc(
@@ -258,6 +260,14 @@ declare namespace cc {
       fillColor?: Color,
       lineWidth?: number,
       lineColor?: Color
+    );
+
+    public drawRect(
+      origin: Point,
+      destination: Point,
+      fillColor: Colir,
+      lineWidth: Number,
+      lineColor: Color
     );
 
     public drawDot(pos: Point, radius: number, color: Color);

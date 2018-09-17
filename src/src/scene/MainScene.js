@@ -1,38 +1,16 @@
 import MersenneTwister from 'mersenne-twister';
 
-import {createSingleLayerScene} from '@/util/cocos2d-util';
 import {TbmStorage} from '@/core/TbmStorage';
 import {TbmCharacter} from '@/core/TbmCharacter';
 import {ResultScene} from '@/scene/ResultScene';
 
 import {RESOURCE_MAP} from '@/resource';
 import {AppConstants} from '@/core/constants';
-
-/** 敵定義データ */
-class EnemyDefinition {
-  /**
-   * @param {number} row スプライトシート上の行インデックス(一番上は0)
-   * @param {number} col スプライトシート上の列インデックス÷3(一番左は0).
-   *                     列のみ、1キャラ3マスなのでキャラ単位
-   * @param {number} scale 表示倍率
-   * @param {boolean} flying 飛べるかどうか
-   */
-  constructor(row, col, scale, flying) {
-    this.row = row;
-    this.col = col;
-    this.scale = scale;
-    this.flying = flying;
-  }
-}
-
-const ENEMY_DEFINITIONS = [
-  new EnemyDefinition(3, 1, AppConstants.BASE_SCALE, false), // こいし
-  new EnemyDefinition(3, 3, AppConstants.BASE_SCALE, true), // お空
-  new EnemyDefinition(3, 1, AppConstants.BASE_SCALE * 1.5, false), // でかいこいし
-];
+import {CHARACTER_SET_MAP} from '@/core/caharacter-def';
 
 /**
  * @typedef MainLayerProps
+ * @property {string} chosenChatacterName;
  * @property {number} score
  * @property {number} enemyWait 次の敵が出現するまでの待ち時間
  * @property {boolean} isLive
@@ -49,11 +27,10 @@ const ENEMY_DEFINITIONS = [
 
 /** @type {cc.Layer & MainLayerProps} */
 const mainLayerProps = {
-  CHARACTER_WIDTH: 24,
-  CHARACTER_HEIGHT: 32,
-
-  ctor() {
+  ctor(chosenChatacterName) {
     this._super();
+
+    this.chosenChatacterName = chosenChatacterName;
 
     this.isLive = true;
     this.enemyWait = 0;
@@ -67,7 +44,7 @@ const mainLayerProps = {
 
     const bg = new cc.Sprite(RESOURCE_MAP.BG_Country_Platform_png);
     bg.setAnchorPoint(0, 0);
-    bg.setScale(1.5);
+    bg.setScale(AppConstants.BASE_SCALE);
     this.addChild(bg);
     this.bg = bg;
 
@@ -121,14 +98,14 @@ const mainLayerProps = {
   /** 物理エンジン周りの初期化 */
   initPhysics() {
     const space = new cp.Space();
-    space.gravity = cp.v(0, -1200);
+    space.gravity = cp.v(0, -1300);
     if ('production' !== process.env.NODE_ENV) {
       const phDebugNode = new cc.PhysicsDebugNode(space);
       phDebugNode.setVisible(true);
       this.addChild(phDebugNode, 100);
     }
 
-    const floorHeight = (cc.winSize.height * 13) / 100;
+    const floorHeight = (cc.winSize.height * 15) / 100;
     const floor = new cp.SegmentShape(
         new cp.StaticBody(),
         cp.v(0, floorHeight),
@@ -148,7 +125,11 @@ const mainLayerProps = {
   },
 
   initPlayerCharacter() {
-    const pc = new TbmCharacter(1, 2, AppConstants.BASE_SCALE, 0);
+    const pc = new TbmCharacter(
+        CHARACTER_SET_MAP[this.chosenChatacterName].playerCharacterDef,
+        0,
+        false
+    );
     pc.getShape().setCollisionType(AppConstants.COLLISION_TYPE_PLAYER);
     this.addCharacter(pc);
     this.playerCharacter = pc;
@@ -250,8 +231,8 @@ const mainLayerProps = {
   },
 
   generateEnemy() {
-    const enemyDef =
-      ENEMY_DEFINITIONS[this.mt.random_int() % ENEMY_DEFINITIONS.length];
+    const enemyDefs = CHARACTER_SET_MAP[this.chosenChatacterName].enemyDefs;
+    const enemyDef = enemyDefs[this.mt.random_int() % enemyDefs.length];
     let flightLevel = 0;
     if (enemyDef.flying) {
       flightLevel =
@@ -260,12 +241,7 @@ const mainLayerProps = {
           (this.mt.random_int() % 3)) /
         2;
     }
-    const enemy = new TbmCharacter(
-        enemyDef.row,
-        enemyDef.col,
-        enemyDef.scale,
-        flightLevel
-    );
+    const enemy = new TbmCharacter(enemyDef, flightLevel, true);
 
     enemy.getShape().setCollisionType(AppConstants.COLLISION_TYPE_ENEMY);
     const body = enemy.getSprite().getBody();
@@ -290,14 +266,14 @@ const mainLayerProps = {
     this.playerCharacter
         .getSprite()
         .getBody()
-        .applyImpulse(cp.v(0, 500), cp.v(0, 0));
+        .applyImpulse(cp.v(0, 700), cp.v(0, 0));
   },
 
   onCollision() {
     this.isLive = false;
     cc.eventManager.removeAllListeners();
 
-    const next = new ResultScene(this.score);
+    const next = new ResultScene(this.score, this.chosenChatacterName);
     // TransitionFadeがときどきこけるので自前で処理
     // const trans = new cc.TransitionFade(1, next, cc.color.RED);
 
@@ -312,4 +288,18 @@ const mainLayerProps = {
   },
 };
 
-export const MainScene = createSingleLayerScene(mainLayerProps);
+/** @type {cc.Scene} */
+const mainSceneProps = {
+  ctor(chosenCharacterName) {
+    this._super();
+    this.chosenCharacterName = chosenCharacterName;
+  },
+  onEnter() {
+    this._super();
+    const LayerClass = cc.Layer.extend(mainLayerProps);
+    const layer = new LayerClass(this.chosenCharacterName);
+    this.addChild(layer);
+  },
+};
+
+export const MainScene = cc.Scene.extend(mainSceneProps);

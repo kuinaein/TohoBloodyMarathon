@@ -1,32 +1,33 @@
 import {AppConstants} from '@/core/constants';
-import {RESOURCE_MAP} from '@/resource';
+
+// eslint-disable-next-line no-unused-vars
+import {CharacterDef} from '@/core/caharacter-def';
 
 /** キャラクタ */
 export class TbmCharacter {
   /**
-   * @param {number} row
-   * @param {number} col
-   * @param {number} scale
-   * @param {number} flightLevel
+   * @param {CharacterDef} def
+   * @param {number} flightLevel 飛行高度
+   * @param {boolean} isEnemy
    */
-  constructor(row, col, scale, flightLevel) {
+  constructor(def, flightLevel, isEnemy) {
+    this.def = def;
     this.flightLevel = flightLevel;
 
-    const resourece = RESOURCE_MAP.ChireidenCharacters_png;
     const baseRect = cc.rect(
-        AppConstants.CHARACTER_WIDTH * col * 3,
-        AppConstants.CHARACTER_HEIGHT * row,
+        AppConstants.CHARACTER_WIDTH * this.def.col * 3,
+        AppConstants.CHARACTER_HEIGHT * (this.def.row * 4 + (isEnemy ? 3 : 1)),
         AppConstants.CHARACTER_WIDTH,
         AppConstants.CHARACTER_HEIGHT
     );
 
-    const spriteFrame = new cc.SpriteFrame(resourece, baseRect);
+    const spriteFrame = new cc.SpriteFrame(this.def.imageFilename, baseRect);
     const sprite = new cc.PhysicsSprite(spriteFrame);
-    sprite.setScale(scale);
+    sprite.setScale(this.def.scale);
     sprite.setAnchorPoint(cc.p(0.5, 0));
-    const bodyWidth = AppConstants.CHARACTER_WIDTH * 0.5 * scale;
-    const bodyHeight = AppConstants.CHARACTER_HEIGHT * 0.8 * scale;
-    const bodyOffsetY = AppConstants.CHARACTER_HEIGHT * 0.1 * scale;
+    const bodyWidth = AppConstants.CHARACTER_WIDTH * 0.5 * this.def.scale;
+    const bodyHeight = AppConstants.CHARACTER_HEIGHT * 0.8 * this.def.scale;
+    const bodyOffsetY = AppConstants.CHARACTER_HEIGHT * 0.1 * this.def.scale;
     const body = new cp.Body(1, cp.momentForBox(1, bodyWidth, bodyHeight));
     body.setPos(cp.v((cc.winSize.width * 1) / 10, 0));
     this.shape = new cp.BoxShape2(
@@ -64,6 +65,11 @@ export class TbmCharacter {
     const anime = new cc.Animation(animeFrames, 0.1);
     anime.setRestoreOriginalFrame(true);
     this.sprite.runAction(cc.repeatForever(new cc.Animate(anime)));
+  }
+
+  /** @return {CharacterDef} */
+  getDef() {
+    return this.def;
   }
 
   /** @return {number} */

@@ -6,7 +6,7 @@ const aboutLayerProps = {
   ctor() {
     this._super(cc.color.WHITE);
 
-    const satori = new cc.Sprite(RESOURCE_MAP.Satori_jpg);
+    const satori = new cc.Sprite(RESOURCE_MAP.Satori_About_jpg);
     satori.setScale(0.4);
     satori.setOpacity(48);
     satori.setAnchorPoint(cc.p(1, 0));
@@ -72,7 +72,7 @@ const aboutLayerProps = {
   onTouchBegan(touch, event) {
     cc.eventManager.removeAllListeners();
     cc.director.runScene(new tbm.TitleScene());
-    return true;
+    return false;
   },
 };
 
