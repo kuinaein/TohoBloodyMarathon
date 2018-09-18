@@ -25,10 +25,9 @@
 ## ビルド手順
 
 1. `cd src`
-2. `yarn install`
-3. `yarn prepare`
-4. `yarn build`
-
-- <u>エミュレータを起動した上で</u>`yarn emu`で動作確認可
-
-5. `cordova build android --device --release`
+1. `yarn install`
+1. `yarn prepare`
+1. `yarn build`
+   - `yarn dev`で PC ブラウザ上での動作確認可
+   - <u>エミュレータを起動した上で</u>`yarn emu`で動作確認可
+1. `cordova build android --device --release -- --keystore=xxx --storePassword=xxx --alias=xxx --password=xxx`
