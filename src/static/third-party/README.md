@@ -1,13 +1,13 @@
 # 著作権に関する注意事項
 
-このフォルダに含まれる画像は、東方血吐走の開発者（水鶏）ではない方が著作権を保有しています。
+このフォルダ、及び[`/res/`](../../../res/)に含まれるファイルは、東方血吐走の開発者（水鶏）ではない方が著作権を保有しています。
 二次利用等については、それぞれの作者様の意向に従ってください。
 
 ## 東方 Project 関係
 
 - 本作品に登場するキャラクターや世界観等の著作権は、上海アリス幻樂団様が保有しています。
   - [上海アリス幻樂団](http://www16.big.or.jp/~zun/)
-- [キャラクターのドット絵](./dispel) は、spellyon 様からお借りしています。
+- [キャラクターのドット絵](./dispell) は、spellyon 様からお借りしています。
   - 配布元： [点睛集積](http://dispell.net/)
 - アイコン及びタイトルのお燐ほか[erl ディレクトリ](./erl)のイラストは、エルル様からお借りしています。
   - 配布元： [えるるのだいあり](http://erl.hatenablog.jp)
@@ -15,7 +15,7 @@
 ## その他の画像
 
 - [タイトルロゴ](./title-logo.png)に、SIMO 様の「青柳隷書しも」フォントを利用しています。
-  - 配布元： [武蔵システム](https://opentype.jp/aoyagireisho.htm)
+  - 配布元： [武蔵システム](https://opentype.jp/)
 - [前景の木と道](./country-platform-tiles-example.png) は、Luis Zuno 様が CC0 ライセンスで提供しています。
   - 配布元： [OpenGameArt.org](https://opengameart.org/content/country-side-platform-tiles)
 - [背景の木々の写真](./forest-931706_640.jpg)は、CC0 ライセンスで提供されています。
@@ -28,7 +28,7 @@
 - [BGM](./adventuring_song.mp3)は、Daniel Stephens 様が CC0 ライセンスで提供されています。
   - 配布元： [OpenGameArt.org](https://opengameart.org/content/adventure-time)
 - [GUI Sound Effects](./lokif-gui-se)は、Lokif 様が CC0 ライセンスで提供されています。
-  - 配布元： [OpenGameArt.org](https://opengameart.org/content/gui-sound-effects
+  - 配布元： [OpenGameArt.org](https://opengameart.org/content/gui-sound-effects)
 - [衝突音](./qubodupPunch05.ogg)は、Iwan Gabovitch 様が CC0 ライセンスで提供されています。
   - 配布元： [OpenGameArt.org](https://opengameart.org/content/punch)
 - [ジャンプ音](./jumppp22.mp3)は、Ignas Dauksa 様が CC0 ライセンスで提供されています。

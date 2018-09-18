@@ -24,9 +24,11 @@ declare namespace cp {
   export class Arbiter {}
 
   export class Shape {
+    public getBB(): BB;
     public setCollisionType(collision_type: number);
     public setFriction(u: number);
     public setElasticity(e: number);
+    public getBody(): Body;
   }
 
   export class SegmentShape extends Shape {
@@ -50,11 +52,20 @@ declare namespace cp {
     public eachShape(func: (shape: cp.Shape) => void);
     public getPos(): Vect;
     public setPos(pos: Vect);
+    public getVel(): Vect;
+    public setVel(velocity: vect);
+    public setMoment(moment: number);
     public applyImpulse(j: Vect, r: Vect);
     public velocity_func(gravity: Vect, damping: number, dt: number);
   }
 
   export class StaticBody extends Body {}
+
+  export class Constraint {}
+
+  export class PinJoint extends Constraint {
+    public constructor(a: Body, b: Body, anchr1: Vect, anchr2: Vect);
+  }
 
   export class Space {
     public gravity: Vect;
@@ -71,6 +82,8 @@ declare namespace cp {
       postSolve?: (arb: Arbiter, space: Space) => boolean,
       separate?: (arb: Arbiter, space: Space) => void
     );
+    public addConstraint(constraint: Constraint): Constraint;
+    public removeConstraint(constraint: Constraint);
     public step(dt: number);
   }
 }

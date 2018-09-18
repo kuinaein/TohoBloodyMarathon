@@ -25,19 +25,21 @@ export class TbmCharacter {
     const sprite = new cc.PhysicsSprite(spriteFrame);
     sprite.setScale(this.def.scale);
     sprite.setAnchorPoint(cc.p(0.5, 0));
-    // 当たり判定(Shapeの下端)をSpriteの下端より上にしようとすると
-    // 不思議なことが起こるのでやめた
     const bodyWidth = AppConstants.CHARACTER_WIDTH * 0.5 * this.def.scale;
-    const bodyHeight = AppConstants.CHARACTER_HEIGHT * 0.9 * this.def.scale;
+    const bodyHeight = AppConstants.CHARACTER_HEIGHT * 0.8 * this.def.scale;
+    const bodyOffsetY = AppConstants.CHARACTER_HEIGHT * 0.1 * this.def.scale;
     const body = new cp.Body(1, cp.momentForBox(1, bodyWidth, bodyHeight));
     body.setPos(cp.v((cc.winSize.width * 1) / 10, 0));
     this.shape = new cp.BoxShape2(
         body,
-        new cp.BB(-(bodyWidth / 2), 0, bodyWidth / 2, bodyHeight)
+        new cp.BB(
+            -(bodyWidth / 2),
+            bodyOffsetY,
+            bodyWidth / 2,
+            bodyOffsetY + bodyHeight
+        )
     );
-    // 弾性係数を1やデフォルト値を使うと不思議なことが起こる
-    // 自機は上げないほうがよさげ(上げても0.7ぐらいが限度？)
-    this.shape.setElasticity(isEnemy ? 1 : 0);
+    this.shape.setElasticity(1);
     this.shape.setFriction(1);
     sprite.setBody(body);
 

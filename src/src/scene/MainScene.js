@@ -22,6 +22,8 @@ const JUMP_FORCE = cc.winSize.height * 1.5;
  * @property {MersenneTwister} mt
  * @property {cp.Space} space
  * @property {cc.Sprite} bg
+ * @property {boolean} areJointedFloorAndCharacter
+ * @property {cc.PinJoint} jointFloorAndCharacter
  * @property {cc.LabelTTF} scoreLabel
  * @property {cc.LabelTTF} grazeLabel
  * @property {TbmCharacter} playerCharacter
@@ -79,7 +81,6 @@ const mainLayerProps = {
     );
     scoreLabel.setAnchorPoint(cc.p(1, 1));
     scoreLabel.setPosition(cc.winSize.width * 0.98, cc.winSize.height * 0.98);
-    // scoreLabel.setFontFillColor(cc.color.BLACK);
     this.addChild(scoreLabel);
 
     const highScore = TbmStorage.get(TbmStorage.KEY_HIGH_SCORE) || 0;
@@ -93,7 +94,6 @@ const mainLayerProps = {
         scoreLabel.x,
         scoreLabel.y - cc.winSize.height * 0.08
     );
-    // highScoreLabel.setFontFillColor(cc.color.BLACK);
     this.addChild(highScoreLabel);
 
     this.scoreLabel = scoreLabel;
@@ -119,6 +119,7 @@ const mainLayerProps = {
     floor.setElasticity(0);
     space.addStaticShape(floor);
     this.floorHeight = floorHeight;
+    this.floorShape = floor;
 
     space.addCollisionHandler(
         AppConstants.COLLISION_TYPE_PLAYER,
@@ -135,8 +136,22 @@ const mainLayerProps = {
         0,
         false
     );
-    pc.getShape().setCollisionType(AppConstants.COLLISION_TYPE_PLAYER);
+    const pcShape = pc.getShape();
+    pcShape.setCollisionType(AppConstants.COLLISION_TYPE_PLAYER);
     this.addCharacter(pc);
+
+    const pcBody = pcShape.getBody();
+    pcBody.setMoment(Number.POSITIVE_INFINITY); // 回転無効
+    const joint = new cp.PinJoint(
+        pcBody,
+        this.floorShape.getBody(),
+        cp.v(0, 0),
+        cp.v(pcBody.getPos().x, this.floorHeight)
+    );
+    this.space.addConstraint(joint);
+    this.jointFloorAndCharacter = joint;
+    this.areJointedFloorAndCharacter = true;
+
     this.playerCharacter = pc;
   },
 
@@ -156,10 +171,13 @@ const mainLayerProps = {
 
   update(dt) {
     this._super(dt);
+    this.updatePlayerCharacter();
     this.space.step(dt);
 
-    // 背景画像のスクロール;
-    this.bg.setPositionX(this.bg.getPositionX() - 1);
+    // 背景画像のスクロール. 1万点ごとに10%加速
+    this.bg.setPositionX(
+        this.bg.getPositionX() - 2 - 0.2 * Math.floor(this.score / 10000)
+    );
     const bgBox = this.bg.getBoundingBoxToWorld();
     if (cc.winSize.width > bgBox.x + bgBox.width) {
       this.bg.setPositionX(bgBox.x + bgBox.width / 3);
@@ -172,6 +190,43 @@ const mainLayerProps = {
     }
 
     return true;
+  },
+
+  updatePlayerCharacter() {
+    if (!this.isLive) {
+      // 衝突ハンドラ内では変更ができないので
+      if (this.areJointedFloorAndCharacter) {
+        this.areJointedFloorAndCharacter = false;
+        this.space.removeConstraint(this.jointFloorAndCharacter);
+        const pcShape = this.playerCharacter.getShape();
+        // getMass()はない...
+        const pcShapeBox = pcShape.getBB();
+        // 回転を有効にする
+        pcShape
+            .getBody()
+            .setMoment(
+                cp.momentForBox(
+                    1,
+                    pcShapeBox.r - pcShapeBox.l,
+                    pcShapeBox.t - pcShapeBox.b
+                )
+            );
+      }
+    } else {
+      const pcBody = this.playerCharacter.getSprite().getBody();
+      // マシンに十分な性能がないと
+      // (多分Space.step()に渡したdtの大きさによる)
+      // 弾性係数を0にしてもたまに床にバウンドするので、
+      // ある程度まで落下したら自機を床と接続してしまう
+      if (
+        !this.areJointedFloorAndCharacter &&
+        0 > pcBody.getVel().y &&
+        this.floorHeight + AppConstants.CHARACTER_HEIGHT / 4 > pcBody.getPos().y
+      ) {
+        this.space.addConstraint(this.jointFloorAndCharacter);
+        this.areJointedFloorAndCharacter = true;
+      }
+    }
   },
 
   updateEnemies(dt) {
@@ -242,16 +297,18 @@ const mainLayerProps = {
     const body = enemy.getSprite().getBody();
     body.velocity_func = () => {}; // 重力を無効化
     body.setPos(cp.v(cc.winSize.width, body.getPos().y));
-    // 10秒ごとに初期速度の10%荷重
+    // 1万点(約10秒)ごとに初期速度の10%加速
     const velocity = 150 + 15 * Math.floor(this.score / 10000);
-    body.applyImpulse(cp.v(-velocity, 0), cp.v(0, 0));
+    body.setVel(cp.v(-velocity, 0));
     this.addCharacter(enemy);
     this.enemies.push(enemy);
   },
 
   isAbleToJump() {
+    // 床にバウンドする不具合を根絶するまで身長の半分までは許容
     return (
-      this.floorHeight + AppConstants.CHARACTER_HEIGHT >
+      this.floorHeight +
+        this.playerCharacter.getSprite().getContentSize().height / 2 >
       this.playerCharacter.getSprite().getPositionY()
     );
   },
@@ -264,10 +321,14 @@ const mainLayerProps = {
     if (!this.isAbleToJump()) {
       return;
     }
+    this.space.removeConstraint(this.jointFloorAndCharacter);
+    this.areJointedFloorAndCharacter = false;
     this.playerCharacter
         .getSprite()
         .getBody()
-        .applyImpulse(cp.v(0, JUMP_FORCE), cp.v(0, 0));
+        .setVel(cp.v(0, JUMP_FORCE));
+    // .applyImpulse(cp.v(0, JUMP_FORCE), cp.v(0, 0));
+    // applyImpulse()だと連打すると1タップ毎に加速がついてしまう
     cc.audioEngine.playEffect(RESOURCE_MAP.SE_Jump);
   },
 

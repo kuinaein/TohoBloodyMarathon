@@ -7,7 +7,6 @@
 本作品は東方 Project の二次創作です。
 
 <u>**MIT ライセンスが適用されるのはプログラム部分のみ**</u>であり、キャラクターや世界観等については下記の方々が著作権を保有しています。二次利用等については、それぞれの作者様の意向に従ってください。
-Antergos
 
 - [素材等の著作権についてはこちら](./src/static/third-party/README.md)
 
@@ -26,10 +25,10 @@ Antergos
 ## ビルド手順
 
 1. `cd src`
-1. `yarn install`
-1. `yarn prepare`
-1. `yarn build`
+2. `yarn install`
+3. `yarn prepare`
+4. `yarn build`
 
 - <u>エミュレータを起動した上で</u>`yarn emu`で動作確認可
 
-1. `cordova build android --device --release`
+5. `cordova build android --device --release`
